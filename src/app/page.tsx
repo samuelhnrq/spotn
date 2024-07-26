@@ -1,20 +1,30 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import SpotnBar from "./SpotnBar";
+import ArtistSelector from "./ArtistSelector";
 
 export default function Home() {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        margin: "0 auto",
-        maxWidth: "750px",
-        minHeight: "100vh",
-        justifyContent: "space-evenly",
-        alignItems: "center",
-      }}
-    >
-      <Typography variant="h1">Spotn</Typography>
-      <Button variant="outlined">Hello world</Button>
-    </Box>
+    <Stack height="100vh">
+      <SpotnBar />
+      <Box
+        sx={{
+          display: "flex",
+          flex: "1 1 0",
+          flexDirection: "column",
+          width: "100%",
+          margin: "0 auto",
+          maxWidth: "550px",
+          justifyContent: "space-evenly",
+          alignItems: "center",
+        }}
+      >
+        <Stack width="100%" justifyContent="center">
+          <Typography variant="h1" align="center">
+            Spotn
+          </Typography>
+          <ArtistSelector />
+        </Stack>
+      </Box>
+    </Stack>
   );
 }
