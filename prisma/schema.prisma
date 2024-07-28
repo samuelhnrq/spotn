@@ -6,15 +6,37 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+enum Gender {
+    Male
+    Female
+    Mixed
+}
+
+model Artist {
+    id         Int           @id @default(autoincrement())
+    artistGid  String        @db.Uuid
+    name       String
+    debutYear  Int
+    members    Int
+    rank       Int
+    gender     Gender
+    genre      String
+    Country    String
+    listens    BigInt
+    createdAt  DateTime      @default(now())
+    updatedAt  DateTime      @default(now()) @updatedAt
+    dailyPicks DailyArtist[]
 
     @@index([name])
+}
+
+model DailyArtist {
+    id       Int      @id @default(autoincrement())
+    day      DateTime
+    artist   Artist   @relation(fields: [artistId], references: [id])
+    artistId Int
 }
