@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import SpotnBar from "./SpotnBar";
 import ArtistSelector from "./ArtistSelector";
 

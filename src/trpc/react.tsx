@@ -57,7 +57,7 @@ export function TRPCReactProvider(props: PropsWithChildren) {
           },
         }),
       ],
-    })
+    }),
   );
 
   return (

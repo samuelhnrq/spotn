@@ -1,19 +1,23 @@
-import { z } from "zod";
+import { createTRPCRouter } from "@/server/api/trpc";
+import getTodayArtist from "../getTodayArtist";
+import guessArtist from "../guessArtist";
 
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+export const artistRouter = createTRPCRouter({
+  // hello: publicProcedure
+  //   .input(z.object({ text: z.string() }))
+  //   .query(({ input }) => {
+  //     return {
+  //       greeting: `Hello ${input.text}`,
+  //     };
+  //   }),
 
-export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
+  guessArtist,
 
-  searchByName: publicProcedure.input(z.string()).query(({ ctx, input }) => {
-    return ctx.db.artist.findMany({ where: { name: { contains: input } } });
-  }),
+  getTodayArtist,
+
+  // searchByName: publicProcedure.input(z.string()).query(({ ctx, input }) => {
+  //   return ctx.db.artist.findMany({ where: { name: { contains: input } } });
+  // }),
 
   // create: publicProcedure
   //   .input(z.object({ name: z.string().min(1) }))
