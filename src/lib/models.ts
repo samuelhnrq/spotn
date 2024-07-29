@@ -7,12 +7,14 @@ export interface GuessAnswer {
   rankDelta: number;
 }
 
+/* eslint-disable no-unused-vars */
 export enum ArtistGender {
   Male,
   Female,
   Queer,
   Mixed,
 }
+/* eslint-enable no-unused-vars */
 
 export interface Artist {
   name: string;

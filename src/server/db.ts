@@ -9,7 +9,7 @@ const createPrismaClient = () =>
     log: isProd ? ["error"] : ["query", "error", "warn"],
   });
 
-const globalForPrisma = globalThis as unknown as {
+const globalForPrisma = global as unknown as {
   prisma: ReturnType<typeof createPrismaClient> | undefined;
 };
 
