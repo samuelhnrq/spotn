@@ -25,7 +25,7 @@ model Artist {
     rank       Int
     gender     Gender
     genre      String
-    Country    String
+    country    String
     listens    BigInt
     createdAt  DateTime      @default(now())
     updatedAt  DateTime      @default(now()) @updatedAt

@@ -13,25 +13,35 @@ interface MbSearchResponse {
   created: string;
 }
 
+const kyClient = ky.extend({
+  headers: {
+    "User-Agent": "Spotn/0.1.0 (https://github.com/samuelhnrq/spotn)",
+  },
+});
+
 export async function searchArtist(
-  artistName: string
+  artistName: string,
 ): Promise<MbSearchResult[]> {
   if (!artistName || artistName.length < 3) {
     return [];
   }
-  const test = await ky
+  const resp = await kyClient
     .get("https://musicbrainz.org/ws/2/artist/", {
-      headers: {
-        "User-Agent": "Spotn/0.1.0 (https://github.com/samuelhnrq/spotn)",
-      },
       searchParams: {
         query: artistName,
-        // format: "json",
       },
     })
     .json<MbSearchResponse>();
-  return test.artists.map((x) => ({
+  return resp.artists.map((x) => ({
     mbid: x.id,
     name: x.name,
   }));
+}
+
+export async function getArtistById(mbid: string): Promise<MbArtist> {
+  return kyClient
+    .get(`https://musicbrainz.org/ws/2/artist/${mbid}`, {
+      searchParams: { inc: "release-groups artist-rels" },
+    })
+    .json<MbArtist>();
 }

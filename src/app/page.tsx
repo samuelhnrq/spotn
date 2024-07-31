@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import SpotnBar from "./SpotnBar";
 import ArtistSelector from "./ArtistSelector";
+import GuessesList from "./GuessesList";
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
             Spotn
           </Typography>
           <ArtistSelector />
+          <GuessesList />
         </Stack>
       </Box>
     </Stack>
