@@ -1,6 +1,6 @@
+import type { GuessAnswer } from "@/lib/models";
 import { z } from "zod";
 import { publicProcedure } from "./trpc";
-import type { GuessAnswer } from "@/lib/models";
 
 export default publicProcedure
   .input(z.string().uuid())

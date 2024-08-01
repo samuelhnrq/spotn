@@ -1,7 +1,7 @@
+import { type Artist, Gender } from "@prisma/client";
 import { DateTime } from "luxon";
-import { getArtistById, type MbSearchResult } from "./mb-client";
+import { type MbSearchResult, getArtistById } from "./mb-client";
 import type { MbArtist, MbReleaseGroup } from "./mb-models";
-import { Gender, type Artist } from "@prisma/client";
 
 type HasDate = Pick<MbReleaseGroup, "first-release-date">;
 function daysDiff(isoDateA: HasDate, isoDateB: HasDate): number {

@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import type { Metadata } from "next";
 
-import type { PropsWithChildren } from "react";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import { theme } from "@/lib/theme";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { GeistSans } from "geist/font/sans";
+import type { PropsWithChildren } from "react";
 
 import { TRPCReactProvider } from "@/trpc/react";
 

@@ -1,5 +1,5 @@
-import { Toolbar, AppBar, IconButton, Typography, Button } from "@mui/material";
 import { MusicNoteRounded } from "@mui/icons-material";
+import { AppBar, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import React from "react";
 
 function SpotnBar() {

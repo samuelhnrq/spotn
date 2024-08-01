@@ -1,7 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
-import SpotnBar from "./SpotnBar";
 import ArtistSelector from "./ArtistSelector";
 import GuessesList from "./GuessesList";
+import SpotnBar from "./SpotnBar";
 
 export default function Home() {
   return (

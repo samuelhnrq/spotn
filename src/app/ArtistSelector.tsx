@@ -1,5 +1,7 @@
 "use client";
 
+import { type MbSearchResult, searchArtist } from "@/lib/mb-client";
+import { setSelectedArtist } from "@/lib/state";
 import {
   Autocomplete,
   Box,
@@ -7,19 +9,17 @@ import {
   type AutocompleteRenderInputParams as InputParams,
   TextField,
 } from "@mui/material";
-import React, { type ReactNode } from "react";
-import { searchArtist, type MbSearchResult } from "@/lib/mb-client";
-import { createSignal } from "@react-rxjs/utils";
 import { bind } from "@react-rxjs/core";
+import { createSignal } from "@react-rxjs/utils";
+import React, { type ReactNode } from "react";
 import {
   debounceTime,
+  distinctUntilChanged,
+  filter,
   map,
   merge,
   mergeMap,
-  distinctUntilChanged,
-  filter,
 } from "rxjs";
-import { setSelectedArtist } from "@/lib/state";
 
 const [textChange$, setText] = createSignal<string>();
 const [useArtistList, artistList$] = bind(
@@ -68,7 +68,7 @@ function ArtistAutoComplete() {
       renderInput={ArtistSelectorInput}
       getOptionLabel={(x: string | MbSearchResult) => {
         if (typeof x === "string") return x;
-        else return x.name;
+        return x.name;
       }}
       noOptionsText="Artist not found"
       loadingText="Loading artists..."

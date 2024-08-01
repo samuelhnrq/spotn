@@ -1,9 +1,9 @@
-import { createSignal } from "@react-rxjs/utils";
-import { type MbSearchResult } from "./mb-client";
-import { bind } from "@react-rxjs/core";
-import { mergeScan } from "rxjs";
-import { getArtist } from "./mb-service";
 import type { Artist } from "@prisma/client";
+import { bind } from "@react-rxjs/core";
+import { createSignal } from "@react-rxjs/utils";
+import { mergeScan } from "rxjs";
+import type { MbSearchResult } from "./mb-client";
+import { getArtist } from "./mb-service";
 
 export interface SpotnState {
   guesses: Artist[];
