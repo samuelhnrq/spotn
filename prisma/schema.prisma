@@ -2,41 +2,41 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Gender {
-    Male
-    Female
-    Mixed
+  Male
+  Female
+  Mixed
 }
 
 model Artist {
-    id         Int           @id @default(autoincrement())
-    artistGid  String        @db.Uuid
-    name       String
-    debutYear  Int
-    members    Int
-    rank       Int
-    gender     Gender
-    genre      String
-    country    String
-    listens    BigInt
-    createdAt  DateTime      @default(now())
-    updatedAt  DateTime      @default(now()) @updatedAt
-    dailyPicks DailyArtist[]
+  id         Int           @id @default(autoincrement())
+  artistGid  String        @unique @db.Uuid
+  name       String
+  debutYear  Int
+  members    Int
+  rank       Int
+  gender     Gender
+  genre      String
+  country    String
+  listens    Int
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @default(now()) @updatedAt
+  dailyPicks DailyArtist[]
 
-    @@index([name])
+  @@index([name])
 }
 
 model DailyArtist {
-    id       Int      @id @default(autoincrement())
-    day      DateTime
-    artist   Artist   @relation(fields: [artistId], references: [id])
-    artistId Int
+  id       Int      @id @default(autoincrement())
+  day      DateTime
+  artist   Artist   @relation(fields: [artistId], references: [id])
+  artistId Int
 }

@@ -1,7 +1,11 @@
 "use client";
 
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
+import {
+  createTRPCClient,
+  loggerLink,
+  unstable_httpBatchStreamLink,
+} from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { type PropsWithChildren, useState } from "react";
@@ -30,6 +34,26 @@ export const api = createTRPCReact<AppRouter>();
  */
 export type RouterInputs = inferRouterInputs<AppRouter>;
 
+const clientConfig = {
+  links: [
+    loggerLink({
+      enabled: (op) =>
+        process.env.NODE_ENV === "development" ||
+        (op.direction === "down" && op.result instanceof Error),
+    }),
+    unstable_httpBatchStreamLink({
+      transformer: SuperJSON,
+      url: `${getBaseUrl()}/api/trpc`,
+      headers: () => {
+        const headers = new Headers();
+        headers.set("x-trpc-source", "nextjs-react");
+        return headers;
+      },
+    }),
+  ],
+};
+export const trpcClient = createTRPCClient<AppRouter>(clientConfig);
+
 /**
  * Inference helper for outputs.
  *
@@ -40,26 +64,7 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export function TRPCReactProvider(props: PropsWithChildren) {
   const queryClient = getQueryClient();
 
-  const [trpcClient] = useState(() =>
-    api.createClient({
-      links: [
-        loggerLink({
-          enabled: (op) =>
-            process.env.NODE_ENV === "development" ||
-            (op.direction === "down" && op.result instanceof Error),
-        }),
-        unstable_httpBatchStreamLink({
-          transformer: SuperJSON,
-          url: `${getBaseUrl()}/api/trpc`,
-          headers: () => {
-            const headers = new Headers();
-            headers.set("x-trpc-source", "nextjs-react");
-            return headers;
-          },
-        }),
-      ],
-    }),
-  );
+  const [trpcClient] = useState(() => api.createClient(clientConfig));
 
   return (
     <QueryClientProvider client={queryClient}>

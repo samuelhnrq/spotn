@@ -1,23 +1,29 @@
-import type { Artist } from "@prisma/client";
 import { bind } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import { mergeScan } from "rxjs";
-import type { MbSearchResult } from "./mb-client";
-import { getArtist } from "./mb-service";
+import type { ArtistSearchResult, GuessAnswer } from "./models";
+import { guessArtist } from "./mb-client";
 
 export interface SpotnState {
-  guesses: Artist[];
+  guesses: GuessAnswer[];
 }
 const emptyState: SpotnState = { guesses: [] };
 
-const [selectedArtist$, setSelectedArtist] = createSignal<MbSearchResult>();
+const [selectedArtist$, setSelectedArtist] = createSignal<ArtistSearchResult>();
 
 const [useAppState, appState$] = bind(
   selectedArtist$.pipe(
-    mergeScan<MbSearchResult, SpotnState>(
-      async (acc, next): Promise<SpotnState> => ({
-        guesses: [...acc.guesses, await getArtist(next)],
-      }),
+    mergeScan<ArtistSearchResult, SpotnState>(
+      async (acc, next): Promise<SpotnState> => {
+        const guess = await guessArtist(next);
+        if (guess) {
+          console.log("answer for", next.name, guess);
+          return {
+            guesses: [...acc.guesses, guess],
+          };
+        }
+        return acc;
+      },
       emptyState,
     ),
   ),

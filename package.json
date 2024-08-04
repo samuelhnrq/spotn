@@ -41,10 +41,19 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
+    "@snaplet/copycat": "^5.0.0",
+    "@snaplet/seed": "0.98.0",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.14.13",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "tsx": "^4.16.5",
     "typescript": "^5.5.4"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed/seed.ts"
+  },
+  "@snaplet/seed": {
+    "config": "prisma/seed/seed.config.ts"
   }
 }

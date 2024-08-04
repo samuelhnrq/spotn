@@ -1,13 +1,15 @@
 "use client";
 
-import { type MbSearchResult, searchArtist } from "@/lib/mb-client";
-import { setSelectedArtist } from "@/lib/state";
+import { searchArtist } from "@/lib/mb-client";
+import type { ArtistSearchResult } from "@/lib/models";
+import { setSelectedArtist, useAppState } from "@/lib/state";
 import {
   Autocomplete,
   Box,
   CircularProgress,
   type AutocompleteRenderInputParams as InputParams,
   TextField,
+  Typography,
 } from "@mui/material";
 import { bind } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
@@ -24,12 +26,13 @@ import {
 const [textChange$, setText] = createSignal<string>();
 const [useArtistList, artistList$] = bind(
   textChange$.pipe(
-    filter((txt) => !!txt && txt.length > 3),
-    debounceTime(1000),
-    mergeMap((text) => searchArtist(text)),
+    filter((txt) => txt?.length > 3),
+    debounceTime(300),
+    mergeMap(searchArtist),
   ),
   [],
 );
+
 const [useLoading] = bind(
   merge(
     textChange$.pipe(map((txt) => !!txt || txt.length > 3)),
@@ -38,59 +41,65 @@ const [useLoading] = bind(
   false,
 );
 
-function ArtistAutoComplete() {
-  const options = useArtistList();
+function ArtistSelectorInput(params: InputParams): ReactNode {
   const loading = useLoading();
-  function ArtistSelectorInput(params: InputParams): ReactNode {
-    return (
-      <TextField
-        {...params}
-        slotProps={{
-          input: {
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading && <CircularProgress size={20} />}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          },
-        }}
-        label="Artist"
-      />
-    );
-  }
-
   return (
-    <Autocomplete
-      id="free-solo-demo"
-      options={options}
-      renderInput={ArtistSelectorInput}
-      getOptionLabel={(x: string | MbSearchResult) => {
-        if (typeof x === "string") return x;
-        return x.name;
+    <TextField
+      {...params}
+      slotProps={{
+        input: {
+          ...params.InputProps,
+          endAdornment: (
+            <>
+              {loading && <CircularProgress size={20} />}
+              {params.InputProps.endAdornment}
+            </>
+          ),
+        },
       }}
-      noOptionsText="Artist not found"
-      loadingText="Loading artists..."
-      onInputChange={(_ev, val) => setText(val)}
-      isOptionEqualToValue={(opt, val) => opt.mbid === val.mbid}
-      onChange={(_ev, val) => val && setSelectedArtist(val)}
-      loading={loading}
-      renderOption={(props, option) => (
-        <Box component="li" {...props} key={option.mbid}>
-          {option.name}
-        </Box>
-      )}
-      selectOnFocus
-      clearOnBlur
-      fullWidth
-      handleHomeEndKeys
+      label="Artist"
     />
   );
 }
 
-function ArtistSelector() {
-  return <ArtistAutoComplete />;
+function ArtistAutoComplete() {
+  const options = useArtistList();
+  const loading = useLoading();
+  const state = useAppState();
+
+  return (
+    <>
+      <Autocomplete
+        id="free-solo-demo"
+        options={options}
+        renderInput={ArtistSelectorInput}
+        getOptionLabel={(x: string | ArtistSearchResult) => {
+          if (typeof x === "string") return x;
+          return x.name;
+        }}
+        noOptionsText="Artist not found"
+        loadingText="Loading artists..."
+        onInputChange={(_ev, val, reason) =>
+          reason !== "selectOption" && setText(val)
+        }
+        isOptionEqualToValue={(opt, val) => opt.mbid === val.mbid}
+        onChange={(_ev, val) => val && setSelectedArtist(val)}
+        loading={loading}
+        renderOption={(props, option) => (
+          <Box component="li" {...props} key={option.mbid}>
+            {option.name}
+          </Box>
+        )}
+        selectOnFocus
+        clearOnBlur
+        fullWidth
+        handleHomeEndKeys
+      />
+      <Typography width="100%" align="right">
+        Guesses: {state.guesses.length}/10
+      </Typography>
+    </>
+  );
 }
 
-export default ArtistSelector;
+export default ArtistAutoComplete;

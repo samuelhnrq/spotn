@@ -1,8 +1,8 @@
 import { createTRPCRouter } from "@/server/api/trpc";
-import getTodayArtist from "../getTodayArtist";
-import guessArtist from "../guessArtist";
+import guessArtist from "../procedures/guessArtist";
+import searchArtist from "../procedures/searchArtist";
 
 export const artistRouter = createTRPCRouter({
   guessArtist,
-  getTodayArtist,
+  searchArtist,
 });
