@@ -13,11 +13,6 @@ export async function searchArtist(
 
 export async function guessArtist(
   guess: ArtistSearchResult,
-): Promise<GuessAnswer | null> {
-  try {
-    return await trpcClient.artists.guessArtist.query(guess.mbid);
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
+): Promise<GuessAnswer> {
+  return trpcClient.artists.guessArtist.query(guess.mbid);
 }

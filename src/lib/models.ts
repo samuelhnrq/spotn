@@ -1,5 +1,16 @@
 import type { Artist } from "@prisma/client";
 
+export interface SpotnState {
+  guesses: GuessesState;
+}
+
+export interface GuessesState {
+  guesses: GuessAnswer[];
+  hasCorrectGuess: boolean;
+  loading: boolean;
+  date: Date;
+}
+
 export interface GuessAnswer {
   artist: Artist;
   correct: boolean;

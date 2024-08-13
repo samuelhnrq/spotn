@@ -1,33 +1,48 @@
-import { bind } from "@react-rxjs/core";
-import { createSignal } from "@react-rxjs/utils";
-import { mergeScan } from "rxjs";
-import type { ArtistSearchResult, GuessAnswer } from "./models";
-import { guessArtist } from "./mb-client";
+import {
+  combineSlices,
+  configureStore,
+  type Action,
+  type Middleware,
+  type ThunkAction,
+} from "@reduxjs/toolkit";
+import type { SpotnState } from "./models";
+import Cookies from "js-cookie";
+import { guessesSlice } from "./state-guesses";
+import SuperJSON from "superjson";
 
-export interface SpotnState {
-  guesses: GuessAnswer[];
-}
-const emptyState: SpotnState = { guesses: [] };
+export const PERSISTENCE_KEY = "spotn_state";
 
-const [selectedArtist$, setSelectedArtist] = createSignal<ArtistSearchResult>();
+export const makeEmptyState = (): SpotnState => ({
+  guesses: {
+    date: new Date(),
+    guesses: [],
+    hasCorrectGuess: false,
+    loading: false,
+  },
+});
 
-const [useAppState, appState$] = bind(
-  selectedArtist$.pipe(
-    mergeScan<ArtistSearchResult, SpotnState>(
-      async (acc, next): Promise<SpotnState> => {
-        const guess = await guessArtist(next);
-        if (guess) {
-          console.log("answer for", next.name, guess);
-          return {
-            guesses: [...acc.guesses, guess],
-          };
-        }
-        return acc;
-      },
-      emptyState,
-    ),
-  ),
-  emptyState,
-);
+export const makeStore = (preloadedState?: SpotnState) => {
+  return configureStore({
+    reducer: combineSlices(guessesSlice),
+    middleware: (defaultM) => defaultM().concat(persister),
+    preloadedState,
+  });
+};
 
-export { setSelectedArtist, useAppState, appState$ };
+const persister: Middleware<void, SpotnState> =
+  (store) => (next) => (action) => {
+    const result = next(action);
+    Cookies.set(PERSISTENCE_KEY, SuperJSON.stringify(store.getState()), {
+      sameSite: "Lax",
+      path: "/",
+    });
+    return result;
+  };
+
+// Infer the type of makeStore
+export type AppStore = ReturnType<typeof makeStore>;
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<AppStore["getState"]>;
+export type AppDispatch = AppStore["dispatch"];
+// Export a reusable type for handwritten thunks
+export type AppThunk = ThunkAction<void, RootState, unknown, Action>;

@@ -1,8 +1,10 @@
 "use client";
 
+import { useAppDispatch } from "@/lib/hooks";
 import { searchArtist } from "@/lib/mb-client";
 import type { ArtistSearchResult } from "@/lib/models";
-import { setSelectedArtist, useAppState } from "@/lib/state";
+import { fetchItemById } from "@/lib/state-guesses";
+// import { setSelectedArtist, useAppState } from "@/lib/state";
 import {
   Autocomplete,
   Box,
@@ -65,7 +67,8 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
 function ArtistAutoComplete() {
   const options = useArtistList();
   const loading = useLoading();
-  const state = useAppState();
+  const dispatch = useAppDispatch();
+  // const state = useAppState();
 
   return (
     <>
@@ -83,7 +86,7 @@ function ArtistAutoComplete() {
           reason !== "selectOption" && setText(val)
         }
         isOptionEqualToValue={(opt, val) => opt.mbid === val.mbid}
-        onChange={(_ev, val) => val && setSelectedArtist(val)}
+        onChange={(_ev, val) => val && dispatch(fetchItemById(val))}
         loading={loading}
         renderOption={(props, option) => (
           <Box component="li" {...props} key={option.mbid}>
@@ -96,7 +99,7 @@ function ArtistAutoComplete() {
         handleHomeEndKeys
       />
       <Typography width="100%" align="right">
-        Guesses: {state.guesses.length}/10
+        {/* Guesses: {state.guesses.length}/10 */}
       </Typography>
     </>
   );

@@ -139,7 +139,7 @@
           "id": "public.Artist.listens",
           "name": "listens",
           "columnName": "listens",
-          "type": "int8",
+          "type": "int4",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
