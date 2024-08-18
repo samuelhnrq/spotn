@@ -3,7 +3,7 @@ import { Gender, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const alice = await prisma.artist.createMany({
+  await prisma.artist.createMany({
     data: [
       {
         artistGid: "83d91898-7763-47d7-b03b-b92132375c47",
