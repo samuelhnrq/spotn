@@ -1,10 +1,9 @@
 "use client";
 
 import { useAppDispatch } from "@/lib/hooks";
-import { searchArtist } from "@/lib/mb-client";
 import type { ArtistSearchResult } from "@/lib/models";
-import { fetchItemById } from "@/lib/state-guesses";
-// import { setSelectedArtist, useAppState } from "@/lib/state";
+import { guessArtist } from "@/lib/state/guesses";
+import { trpcClient } from "@/lib/trpc";
 import {
   Autocomplete,
   Box,
@@ -26,18 +25,18 @@ import {
 } from "rxjs";
 
 const [textChange$, setText] = createSignal<string>();
-const [useArtistList, artistList$] = bind(
+const [useArtistList, artistList$] = bind<ArtistSearchResult[]>(
   textChange$.pipe(
     filter((txt) => txt?.length > 3),
     debounceTime(300),
-    mergeMap(searchArtist),
+    mergeMap((x) => trpcClient.artists.searchArtist.query(x)),
   ),
   [],
 );
 
 const [useLoading] = bind(
   merge(
-    textChange$.pipe(map((txt) => !!txt || txt.length > 3)),
+    textChange$.pipe(map((txt) => txt.length > 3)),
     artistList$.pipe(map(() => false)),
   ).pipe(distinctUntilChanged()),
   false,
@@ -68,7 +67,6 @@ function ArtistAutoComplete() {
   const options = useArtistList();
   const loading = useLoading();
   const dispatch = useAppDispatch();
-  // const state = useAppState();
 
   return (
     <>
@@ -86,7 +84,7 @@ function ArtistAutoComplete() {
           reason !== "selectOption" && setText(val)
         }
         isOptionEqualToValue={(opt, val) => opt.mbid === val.mbid}
-        onChange={(_ev, val) => val && dispatch(fetchItemById(val))}
+        onChange={(_ev, val) => val && dispatch(guessArtist(val))}
         loading={loading}
         renderOption={(props, option) => (
           <Box component="li" {...props} key={option.mbid}>

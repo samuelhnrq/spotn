@@ -5,9 +5,9 @@ import {
   type Middleware,
   type ThunkAction,
 } from "@reduxjs/toolkit";
-import type { SpotnState } from "./models";
+import type { SpotnState } from "../models";
 import Cookies from "js-cookie";
-import { guessesSlice } from "./state-guesses";
+import { guessesSlice } from "./guesses";
 import SuperJSON from "superjson";
 
 export const PERSISTENCE_KEY = "spotn_state";

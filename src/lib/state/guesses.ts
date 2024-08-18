@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { ArtistSearchResult, GuessesState } from "./models";
+import type { ArtistSearchResult, GuessesState } from "../models";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { trpcClient } from "@/trpc/react";
+import { trpcClient } from "@/lib/trpc";
 
 const initialState: GuessesState = {
   date: new Date(),
@@ -10,7 +10,7 @@ const initialState: GuessesState = {
   guesses: [],
 };
 
-export const fetchItemById = createAsyncThunk(
+export const guessArtist = createAsyncThunk(
   "guesses/guess",
   async (artist: ArtistSearchResult) => {
     console.log("will ask the api");
@@ -26,14 +26,14 @@ export const guessesSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     builder
-      .addCase(fetchItemById.fulfilled, (state, action) => {
+      .addCase(guessArtist.fulfilled, (state, action) => {
         state.guesses.push(action.payload);
         state.loading = false;
       })
-      .addCase(fetchItemById.pending, (state) => {
+      .addCase(guessArtist.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchItemById.rejected, (state) => {
+      .addCase(guessArtist.rejected, (state) => {
         state.loading = false;
       });
   },
