@@ -1,5 +1,4 @@
 import {
-  combineSlices,
   configureStore,
   type Action,
   type Middleware,
@@ -9,6 +8,7 @@ import type { SpotnState } from "../models";
 import Cookies from "js-cookie";
 import { guessesSlice } from "./guesses";
 import SuperJSON from "superjson";
+import { api } from "./api";
 
 export const PERSISTENCE_KEY = "spotn_state";
 
@@ -23,8 +23,12 @@ export const makeEmptyState = (): SpotnState => ({
 
 export const makeStore = (preloadedState?: SpotnState) => {
   return configureStore({
-    reducer: combineSlices(guessesSlice),
-    middleware: (defaultM) => defaultM().concat(persister),
+    reducer: {
+      [api.reducerPath]: api.reducer,
+      guesses: guessesSlice.reducer,
+    },
+    middleware: (defaultM) =>
+      defaultM().concat(persister).concat(api.middleware),
     preloadedState,
   });
 };

@@ -1,8 +1,7 @@
 "use client";
 
-import { useAppDispatch } from "@/lib/hooks";
 import type { ArtistSearchResult } from "@/lib/models";
-import { guessArtist } from "@/lib/state/guesses";
+import { useGuessArtistMutation } from "@/lib/state/api";
 import { trpcClient } from "@/lib/trpc";
 import {
   Autocomplete,
@@ -66,7 +65,7 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
 function ArtistAutoComplete() {
   const options = useArtistList();
   const loading = useLoading();
-  const dispatch = useAppDispatch();
+  const [guessArtist, { isLoading }] = useGuessArtistMutation();
 
   return (
     <>
@@ -84,8 +83,8 @@ function ArtistAutoComplete() {
           reason !== "selectOption" && setText(val)
         }
         isOptionEqualToValue={(opt, val) => opt.mbid === val.mbid}
-        onChange={(_ev, val) => val && dispatch(guessArtist(val))}
-        loading={loading}
+        onChange={(_ev, val) => val && guessArtist(val)}
+        loading={loading || isLoading}
         renderOption={(props, option) => (
           <Box component="li" {...props} key={option.mbid}>
             {option.name}
