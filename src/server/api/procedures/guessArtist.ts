@@ -14,9 +14,9 @@ function numberCompare(a: number, b: number) {
 export default publicProcedure
   .input(z.string().uuid())
   .mutation(async ({ input: artistId }): Promise<GuessAnswer> => {
-    console.log("guessing the ", artistId);
     const guessedArtist = await db.artist.findUniqueOrThrow({
       where: { artistGid: artistId },
+      omit: { createdAt: true, updatedAt: true },
     });
     const todayAnswer = await getTodayArtist();
     return {

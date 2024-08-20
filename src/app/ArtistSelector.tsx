@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppSelector } from "@/lib/hooks";
 import type { ArtistSearchResult } from "@/lib/models";
 import { useGuessArtistMutation } from "@/lib/state/api";
 import { trpcClient } from "@/lib/trpc";
@@ -66,6 +67,7 @@ function ArtistAutoComplete() {
   const options = useArtistList();
   const loading = useLoading();
   const [guessArtist, { isLoading }] = useGuessArtistMutation();
+  const totalGuesses = useAppSelector((s) => s.guesses.guesses.length);
 
   return (
     <>
@@ -96,7 +98,7 @@ function ArtistAutoComplete() {
         handleHomeEndKeys
       />
       <Typography width="100%" align="right">
-        {/* Guesses: {state.guesses.length}/10 */}
+        Guesses: {totalGuesses}/10
       </Typography>
     </>
   );

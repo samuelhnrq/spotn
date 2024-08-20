@@ -1,9 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, isAnyOf } from "@reduxjs/toolkit";
 import type { GuessesState } from "../models";
 import { api } from "./api";
 
 const initialState: GuessesState = {
-  date: new Date(),
+  date: Date.now(),
   loading: false,
   hasCorrectGuess: false,
   guesses: [],
@@ -12,16 +12,23 @@ const initialState: GuessesState = {
 export const guessesSlice = createSlice({
   name: "guesses",
   initialState,
-  reducers: {},
-  extraReducers(builder) {
-    builder.addMatcher(api.endpoints.searchArtist.matchFulfilled, (state) => {
-      console.log("OMGGG");
-      state.date = new Date();
-    });
+  reducers: {
+    resetDate(state) {
+      state.date = Date.now();
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      isAnyOf(api.endpoints.guessArtist.matchFulfilled),
+      (state, action) => {
+        state.guesses.push(action.payload);
+        state.hasCorrectGuess = action.payload.correct;
+      },
+    );
   },
 });
 
 // Action creators are generated for each case reducer function
-// export const { increment, decrement, incrementByAmount } = counterSlice.actions;
+export const { resetDate } = guessesSlice.actions;
 
 export default guessesSlice.reducer;

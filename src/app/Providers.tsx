@@ -6,28 +6,18 @@ import { Provider as ReduxProvider } from "react-redux";
 
 import { theme } from "@/lib/theme";
 import { useRef, type PropsWithChildren } from "react";
-import type { SpotnState } from "@/lib/models";
 import { makeStore, type AppStore } from "@/lib/state";
 
-export interface ProvidersProps {
-  serverState?: SpotnState;
-}
-
-function Providers({
-  children,
-  serverState,
-}: PropsWithChildren<ProvidersProps>) {
-  const storeRef = useRef<AppStore>();
+function Providers({ children }: PropsWithChildren) {
+  const storeRef = useRef<AppStore | null>(null);
   if (!storeRef.current) {
-    storeRef.current = makeStore(serverState);
+    storeRef.current = makeStore();
   }
   return (
     <AppRouterCacheProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <ReduxProvider store={storeRef.current} serverState={serverState}>
-          {children}
-        </ReduxProvider>
+        <ReduxProvider store={storeRef.current}>{children}</ReduxProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>
   );
