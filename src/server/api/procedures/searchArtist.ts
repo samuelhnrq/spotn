@@ -6,8 +6,8 @@ import { db } from "@/server/db";
 export default publicProcedure
   .input(z.string().min(3))
   .query(async ({ input }): Promise<ArtistSearchResult[]> => {
-    const artists = await db.artist.findMany({
-      select: { artistGid: true, name: true },
+    const artists = await db.entity.findMany({
+      select: { id: true, name: true },
       where: {
         name: {
           mode: "insensitive",
@@ -17,7 +17,7 @@ export default publicProcedure
     });
     return artists.map(
       (x): ArtistSearchResult => ({
-        mbid: x.artistGid,
+        id: x.id,
         name: x.name,
       }),
     );

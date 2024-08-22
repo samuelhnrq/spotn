@@ -12,33 +12,65 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-enum Gender {
-  Male
-  Female
-  Mixed
+model EntityKind {
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
+  entities Entity[]
+  props    EntityProp[]
+
+  @@map("entity_kind")
 }
 
-model Artist {
-  id         Int           @id @default(autoincrement())
-  artistGid  String        @unique @db.Uuid
+enum EntityPropType {
+  CATEGORICAL
+  NUMERICAL
+  CHRONOLOGICAL
+  GEOGRAPHICAL
+}
+
+model EntityProp {
+  id     Int               @id @default(autoincrement())
+  name   String
+  type   EntityPropType
+  kinds  EntityKind[]
+  values EntityPropValue[]
+
+  @@map("entity_prop")
+}
+
+model Entity {
+  id         Int               @id @default(autoincrement())
+  kind       EntityKind        @relation(fields: [kindId], references: [id])
+  kindId     Int               @map("kind_id")
   name       String
-  debutYear  Int
-  members    Int
-  rank       Int
-  gender     Gender
-  genre      String
-  country    String
-  listens    Int
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @default(now()) @updatedAt
-  dailyPicks DailyArtist[]
-
-  @@index([name])
+  externalId String?           @map("external_id")
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @default(now()) @updatedAt @map("updated_at")
+  props      EntityPropValue[]
+  dailyPicks DailyEntity[]
 }
 
-model DailyArtist {
+model EntityPropValue {
+  entity   Entity @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  entityId Int    @map("entity_id")
+
+  prop   EntityProp @relation(fields: [propId], references: [id])
+  propId Int        @map("entity_prop_id")
+
+  value     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@id([propId, entityId])
+  @@index([entityId, propId])
+  @@map("entity_prop_value")
+}
+
+model DailyEntity {
   id       Int      @id @default(autoincrement())
   day      DateTime
-  artist   Artist   @relation(fields: [artistId], references: [id])
-  artistId Int
+  entity   Entity   @relation(fields: [entityId], references: [id])
+  entityId Int      @map("entity_id")
+
+  @@map("daily_entity")
 }

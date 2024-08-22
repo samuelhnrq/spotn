@@ -33,6 +33,7 @@
     "luxon": "^3.5.0",
     "next": "^14.2.5",
     "prisma": "^5.18.0",
+    "ramda": "^0.30.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-redux": "^9.1.2",
@@ -47,13 +48,13 @@
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.16.1",
+    "@types/ramda": "^0.30.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/uuid": "^10.0.0",
-    "tsx": "^4.17.0",
     "typescript": "^5.5.4"
   },
   "prisma": {
-    "seed": "tsx prisma/seed/seed.ts"
+    "seed": "bun prisma/seed/seed.ts"
   }
 }

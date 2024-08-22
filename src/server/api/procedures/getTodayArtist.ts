@@ -1,39 +1,48 @@
-import type { Artist } from "@prisma/client";
+import type { Entity } from "@prisma/client";
 import { db } from "@/server/db";
 import { DateTime } from "luxon";
+import type { EntityWithProps } from "@/lib/models";
 
-export async function getTodayArtist(): Promise<Artist> {
+export async function getTodayArtist(): Promise<EntityWithProps> {
   const now = DateTime.now();
-  const today = await db.dailyArtist.findFirst({
+  const today = await db.dailyEntity.findFirst({
     where: {
       day: now.startOf("day").toJSDate(),
-    },
-    include: {
-      artist: true,
     },
     orderBy: {
       day: "desc",
     },
+    include: { entity: { include: { props: { include: { prop: true } } } } },
   });
   if (today) {
-    console.log("already picked today", today.artist.name);
-    return today.artist;
+    console.log("already picked today", today.entity.name);
+    return today.entity;
   }
-  let randomArtist: Artist | null = null;
+  let randomArtist: Entity | null = null;
   while (!randomArtist) {
-    const [nextArtist] = await db.$queryRaw<Artist[]>`
-      SELECT * from "Artist" TABLESAMPLE BERNOULLI(10) limit 1;
+    const [nextArtist] = await db.$queryRaw<Entity[]>`
+      SELECT * from "Entity" TABLESAMPLE BERNOULLI(10) limit 1;
     `;
     if (nextArtist) {
       randomArtist = nextArtist;
     }
   }
-  const newDaily = await db.dailyArtist.create({
+  const newDaily = await db.dailyEntity.create({
     data: {
       day: now.startOf("day").toJSDate(),
-      artistId: randomArtist.id,
+      entityId: randomArtist.id,
     },
-    include: { artist: true },
+    include: {
+      entity: {
+        include: {
+          props: {
+            include: {
+              prop: true,
+            },
+          },
+        },
+      },
+    },
   });
-  return newDaily.artist;
+  return newDaily.entity;
 }

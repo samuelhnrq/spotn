@@ -14,7 +14,7 @@ function GuessesList() {
       </Typography>
       {state.loading && <LinearProgress />}
       {state.guesses.map((guess) => (
-        <GuessedArtistCard guess={guess} key={guess.artist.artistGid} />
+        <GuessedArtistCard guess={guess} key={guess.artist.id} />
       ))}
     </>
   );

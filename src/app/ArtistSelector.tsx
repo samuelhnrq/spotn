@@ -84,11 +84,11 @@ function ArtistAutoComplete() {
         onInputChange={(_ev, val, reason) =>
           reason !== "selectOption" && setText(val)
         }
-        isOptionEqualToValue={(opt, val) => opt.mbid === val.mbid}
+        isOptionEqualToValue={(opt, val) => opt.id === val.id}
         onChange={(_ev, val) => val && guessArtist(val)}
         loading={loading || isLoading}
         renderOption={(props, option) => (
-          <Box component="li" {...props} key={option.mbid}>
+          <Box component="li" {...props} key={option.id}>
             {option.name}
           </Box>
         )}

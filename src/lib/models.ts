@@ -1,4 +1,9 @@
-import type { Artist } from "@prisma/client";
+import type {
+  Entity,
+  EntityProp,
+  EntityPropType,
+  EntityPropValue,
+} from "@prisma/client";
 
 export interface GuessesState {
   guesses: GuessAnswer[];
@@ -7,18 +12,34 @@ export interface GuessesState {
   date: number;
 }
 
-export interface GuessAnswer {
-  artist: Omit<Artist, "updatedAt" | "createdAt">;
+export interface EntityPropWithValues extends EntityPropValue {
+  prop: EntityProp;
+}
+
+export interface EntityWithProps extends Entity {
+  props: EntityPropWithValues[];
+}
+
+export interface NumericalPropComparison extends PropComparison {
+  kind: "NUMERICAL";
+  difference: -1 | 0 | 1;
+}
+
+export interface PropComparison {
+  propId: number;
+  kind: EntityPropType;
+  name: string;
+  value: string;
   correct: boolean;
-  genderCorrect: boolean;
-  countryCorrect: boolean;
-  genreCorrect: boolean;
-  membersDelta: number;
-  debutYearDelta: number;
-  rankDelta: number;
+}
+
+export interface GuessAnswer {
+  artist: EntityWithProps;
+  correct: boolean;
+  comparisions: PropComparison[];
 }
 
 export interface ArtistSearchResult {
   name: string;
-  mbid: string;
+  id: number;
 }

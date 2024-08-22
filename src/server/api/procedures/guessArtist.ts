@@ -3,33 +3,16 @@ import { z } from "zod";
 import { publicProcedure } from "../trpc";
 import { db } from "@/server/db";
 import { getTodayArtist } from "./getTodayArtist";
-
-function numberCompare(a: number, b: number) {
-  const delta = a - b;
-  if (delta === 0) return 0;
-  if (delta > 0) return 1;
-  return -1;
-}
+import { compareEntities } from "@/server/lib/comparator";
 
 export default publicProcedure
-  .input(z.string().uuid())
+  .input(z.number().positive())
   .mutation(async ({ input: artistId }): Promise<GuessAnswer> => {
-    const guessedArtist = await db.artist.findUniqueOrThrow({
-      where: { artistGid: artistId },
-      omit: { createdAt: true, updatedAt: true },
+    const guessedArtist = await db.entity.findUniqueOrThrow({
+      where: { id: artistId },
+      include: { props: { include: { prop: true } } },
     });
     const todayAnswer = await getTodayArtist();
-    return {
-      artist: guessedArtist,
-      correct: todayAnswer.id === guessedArtist.id,
-      genderCorrect: guessedArtist.gender === todayAnswer.gender,
-      genreCorrect: guessedArtist.genre === todayAnswer.genre,
-      countryCorrect: guessedArtist.country === todayAnswer.country,
-      debutYearDelta: numberCompare(
-        guessedArtist.debutYear,
-        todayAnswer.debutYear,
-      ),
-      membersDelta: numberCompare(guessedArtist.members, todayAnswer.members),
-      rankDelta: numberCompare(guessedArtist.rank, todayAnswer.rank),
-    };
+
+    return compareEntities(guessedArtist, todayAnswer);
   });

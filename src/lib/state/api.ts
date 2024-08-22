@@ -22,7 +22,7 @@ export const api = createApi({
       query: (arg) => trpcClient.artists.searchArtist.query(arg),
     }),
     guessArtist: builder.mutation<GuessAnswer, ArtistSearchResult>({
-      query: (arg) => trpcClient.artists.guessArtist.mutate(arg.mbid),
+      query: (arg) => trpcClient.artists.guessArtist.mutate(arg.id),
     }),
   }),
 });
