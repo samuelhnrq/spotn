@@ -5,14 +5,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
-import {
-  AppBar,
-  Avatar,
-  Skeleton,
-  Stack,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import { AppBar, Skeleton, Stack, Toolbar, Typography } from "@mui/material";
 import ArtistSelector from "./ArtistSelector";
 import GuessesList from "./GuessesList";
 
