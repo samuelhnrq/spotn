@@ -7,13 +7,14 @@
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && biome ci && next build",
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^5.3.3",
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
@@ -32,6 +33,7 @@
     "ky": "^1.7.0",
     "luxon": "^3.5.0",
     "next": "^14.2.5",
+    "posthog-js": "^1.157.2",
     "prisma": "^5.18.0",
     "ramda": "^0.30.1",
     "react": "^18.3.1",

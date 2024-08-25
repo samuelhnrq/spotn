@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { publicProcedure } from "../trpc";
 import type { ArtistSearchResult } from "@/lib/models";
 import { db } from "@/server/db";
+import { z } from "zod";
+import { publicProcedure } from "../trpc";
 
 export default publicProcedure
   .input(z.string().min(3))

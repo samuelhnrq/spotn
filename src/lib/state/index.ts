@@ -1,10 +1,10 @@
 import {
-  configureStore,
   type Action,
   type ThunkAction,
+  configureStore,
 } from "@reduxjs/toolkit";
-import guesses from "./guesses";
 import { api } from "./api";
+import guesses from "./guesses";
 
 export const makeStore = () => {
   return configureStore({

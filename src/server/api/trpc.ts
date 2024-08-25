@@ -11,6 +11,12 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
+import type { User } from "@clerk/nextjs/server";
+
+export interface ContextOpts {
+  headers: Headers;
+  user?: User;
+}
 
 /**
  * 1. CONTEXT
@@ -24,7 +30,7 @@ import { db } from "@/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: ContextOpts) => {
   return {
     db,
     ...opts,
@@ -79,7 +85,7 @@ export const createTRPCRouter = t.router;
  * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
  * network latency that would occur in production but not in local development.
  */
-const timingMiddleware = t.middleware(async ({ next, path }) => {
+const timingMiddleware = t.middleware(async ({ next, path, meta }) => {
   const start = Date.now();
 
   if (t._config.isDev) {

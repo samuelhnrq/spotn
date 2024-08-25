@@ -5,5 +5,6 @@
   },
   "linter": {
     "enabled": true
-  }
+  },
+  "files": { "ignore": ["node_modules/", ".next/"] }
 }

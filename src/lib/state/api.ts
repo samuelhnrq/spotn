@@ -1,7 +1,7 @@
+import { type BaseQueryFn, createApi } from "@reduxjs/toolkit/query/react";
+import type { ArtistSearchResult, GuessAnswer } from "../models";
 // api.ts
 import { trpcClient } from "../trpc";
-import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
-import type { ArtistSearchResult, GuessAnswer } from "../models";
 
 const baseQuery: BaseQueryFn<Promise<unknown>> = async (
   promise: Promise<unknown>,
@@ -10,7 +10,8 @@ const baseQuery: BaseQueryFn<Promise<unknown>> = async (
     const data = await promise;
     return { data };
   } catch (error) {
-    return { error };
+    console.error(error);
+    return { error: new String(error) };
   }
 };
 
