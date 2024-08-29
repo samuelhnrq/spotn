@@ -1,13 +1,17 @@
 import type { EntityWithProps } from "@/lib/models";
 import { db } from "@/server/db";
-import type { Entity } from "@prisma/client";
+import type { DailyEntity, Entity } from "@prisma/client";
 import { DateTime } from "luxon";
 
-const INCLUDE_ENTITY_WITH_PROPS = {
+export const INCLUDE_ENTITY_WITH_PROPS = {
   entity: { include: { props: { include: { prop: true } } } },
 };
 
-export async function getTodayArtist(): Promise<EntityWithProps> {
+export interface DayWithProps extends DailyEntity {
+  entity: EntityWithProps;
+}
+
+export async function getTodayArtist(): Promise<DayWithProps> {
   const day = DateTime.now().toUTC().startOf("day").toJSDate();
   const today = await db.dailyEntity.findFirst({
     where: {
@@ -20,7 +24,7 @@ export async function getTodayArtist(): Promise<EntityWithProps> {
   });
   if (today) {
     console.log("Already picked today", today.entity.name);
-    return today.entity;
+    return today;
   }
   console.log("No artist for today, running dice");
   let randomArtist: Entity | null = null;
@@ -40,5 +44,5 @@ export async function getTodayArtist(): Promise<EntityWithProps> {
     },
     include: INCLUDE_ENTITY_WITH_PROPS,
   });
-  return newDaily.entity;
+  return newDaily;
 }

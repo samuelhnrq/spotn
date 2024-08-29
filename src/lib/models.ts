@@ -34,6 +34,7 @@ export interface PropComparison {
 }
 
 export interface GuessAnswer {
+  id: string;
   artist: EntityWithProps;
   correct: boolean;
   comparisions: PropComparison[];

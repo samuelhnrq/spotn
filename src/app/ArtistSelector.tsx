@@ -1,9 +1,7 @@
 "use client";
 
-import { useAppSelector } from "@/lib/hooks";
 import type { ArtistSearchResult } from "@/lib/models";
-import { useGuessArtistMutation } from "@/lib/state/api";
-import { trpcClient } from "@/lib/trpc";
+import { trpc, trpcClient } from "@/lib/trpc";
 import {
   Autocomplete,
   Box,
@@ -16,12 +14,16 @@ import { bind } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import React, { type ReactNode } from "react";
 import {
+  EMPTY,
+  catchError,
   debounceTime,
   distinctUntilChanged,
   filter,
+  from,
   map,
   merge,
   mergeMap,
+  tap,
 } from "rxjs";
 
 const [textChange$, setText] = createSignal<string>();
@@ -29,7 +31,12 @@ const [useArtistList, artistList$] = bind<ArtistSearchResult[]>(
   textChange$.pipe(
     filter((txt) => txt?.length > 3),
     debounceTime(300),
-    mergeMap((x) => trpcClient.artists.searchArtist.query(x)),
+    mergeMap((x) =>
+      from(trpcClient.artists.searchArtist.query(x)).pipe(
+        tap({ error: console.error }),
+        catchError(() => EMPTY),
+      ),
+    ),
   ),
   [],
 );
@@ -65,9 +72,9 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
 
 function ArtistAutoComplete() {
   const options = useArtistList();
-  const loading = useLoading();
-  const [guessArtist, { isLoading }] = useGuessArtistMutation();
-  const totalGuesses = useAppSelector((s) => s.guesses.guesses.length);
+  const isLoading = useLoading();
+  const { mutate: guessArtist } = trpc.artists.guessArtist.useMutation();
+  const { data: guessList = [] } = trpc.artists.listGuesses.useQuery();
 
   return (
     <>
@@ -85,8 +92,8 @@ function ArtistAutoComplete() {
           reason !== "selectOption" && setText(val)
         }
         isOptionEqualToValue={(opt, val) => opt.id === val.id}
-        onChange={(_ev, val) => val && guessArtist(val)}
-        loading={loading || isLoading}
+        onChange={(_ev, val) => val && guessArtist(val.id)}
+        loading={isLoading}
         renderOption={(props, option) => (
           <Box component="li" {...props} key={option.id}>
             {option.name}
@@ -98,7 +105,7 @@ function ArtistAutoComplete() {
         handleHomeEndKeys
       />
       <Typography width="100%" align="right">
-        Guesses: {totalGuesses}/10
+        Guesses: {guessList.length}/10
       </Typography>
     </>
   );

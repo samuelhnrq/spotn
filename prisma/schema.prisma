@@ -48,6 +48,7 @@ model Entity {
   updatedAt  DateTime          @default(now()) @updatedAt @map("updated_at")
   props      EntityPropValue[]
   dailyPicks DailyEntity[]
+  UserGuess  UserGuess[]
 }
 
 model EntityPropValue {
@@ -67,10 +68,23 @@ model EntityPropValue {
 }
 
 model DailyEntity {
-  id       Int      @id @default(autoincrement())
-  day      DateTime
-  entity   Entity   @relation(fields: [entityId], references: [id])
-  entityId Int      @map("entity_id")
+  id        Int         @id @default(autoincrement())
+  day       DateTime
+  entity    Entity      @relation(fields: [entityId], references: [id])
+  entityId  Int         @map("entity_id")
+  UserGuess UserGuess[]
 
   @@map("daily_entity")
+}
+
+model UserGuess {
+  id      Int         @id @default(autoincrement())
+  userId  String
+  day     DailyEntity @relation(fields: [dayId], references: [id])
+  guess   Entity      @relation(fields: [guessId], references: [id])
+  dayId   Int
+  guessId Int
+
+  @@unique([userId, guessId, dayId])
+  @@index([userId])
 }

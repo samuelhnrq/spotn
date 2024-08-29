@@ -1,13 +1,7 @@
-import {
-  ClerkLoading,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import { AppBar, Skeleton, Stack, Toolbar, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import ArtistSelector from "./ArtistSelector";
 import GuessesList from "./GuessesList";
+import NavBar from "./NavBar";
 
 export default function Home() {
   return (
@@ -17,19 +11,7 @@ export default function Home() {
         width: "100%",
       }}
     >
-      <AppBar position="sticky">
-        <Toolbar sx={{ justifyContent: "flex-end" }}>
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          <ClerkLoading>
-            <Skeleton variant="circular" width={30} height={30} />
-          </ClerkLoading>
-        </Toolbar>
-      </AppBar>
+      <NavBar />
       <Stack
         sx={{
           flex: 1,

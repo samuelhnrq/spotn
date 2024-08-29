@@ -4,7 +4,7 @@ import type {
   NumericalPropComparison,
   PropComparison,
 } from "@/lib/models";
-import type { EntityPropType } from "@prisma/client";
+import type { EntityPropType, UserGuess } from "@prisma/client";
 import * as R from "ramda";
 
 type Prop = EntityWithProps["props"][number];
@@ -77,15 +77,21 @@ function compareProp(guess: Prop, answer: Prop): PropComparison {
   return COMPARISON_FUNCTIONS[guess.prop.type](guess, answer);
 }
 
+export interface UserGuessType extends UserGuess {
+  guess: EntityWithProps;
+}
+
 export function compareEntities(
-  guess: EntityWithProps,
   answer: EntityWithProps,
+  userGuess: UserGuessType,
 ): GuessAnswer {
+  const guess = userGuess.guess;
   const propSorter = R.sortBy(R.prop("propId"));
   const guessProps = propSorter(guess.props);
   const answerProps = propSorter(answer.props);
   const comparisions = R.zipWith(compareProp, guessProps, answerProps);
   return {
+    id: userGuess.id.toString(),
     artist: guess,
     correct: R.all<PropComparison>(R.prop("correct"), comparisions),
     comparisions,
