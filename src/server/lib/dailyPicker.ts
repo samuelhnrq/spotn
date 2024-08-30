@@ -1,6 +1,7 @@
 import type { EntityWithProps } from "@/lib/models";
 import { db } from "@/server/db";
 import type { DailyEntity, Entity } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { DateTime } from "luxon";
 
 export const INCLUDE_ENTITY_WITH_PROPS = {
@@ -26,11 +27,16 @@ export async function getTodayArtist(): Promise<DayWithProps> {
     console.log("Already picked today", today.entity.name);
     return today;
   }
+  const totalEntities = await db.entity.count();
+  if (totalEntities === 0) {
+    console.error("Database is empty");
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
   console.log("No artist for today, running dice");
   let randomArtist: Entity | null = null;
   while (!randomArtist) {
     const [nextArtist] = await db.$queryRaw<Entity[]>`
-      SELECT * from "Entity" TABLESAMPLE BERNOULLI(10) limit 1;
+      SELECT * from entity TABLESAMPLE BERNOULLI(10) limit 1;
     `; // Somehow bernoully is not guaranteed to select one
     if (nextArtist) {
       randomArtist = nextArtist;

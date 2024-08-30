@@ -7,7 +7,8 @@ async function main() {
     data: {
       name: "Artist",
       props: {
-        create: [
+        connect: [
+          // These are created in prisma/migrations/20240830121750_renames_tables/migration.sql
           { id: 1, name: "Debut Year", type: EntityPropType.CHRONOLOGICAL },
           { id: 2, name: "Members", type: EntityPropType.NUMERICAL },
           { id: 3, name: "Popularity", type: EntityPropType.NUMERICAL },

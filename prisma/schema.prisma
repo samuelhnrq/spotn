@@ -49,6 +49,8 @@ model Entity {
   props      EntityPropValue[]
   dailyPicks DailyEntity[]
   UserGuess  UserGuess[]
+
+  @@map("entity")
 }
 
 model EntityPropValue {
@@ -86,5 +88,6 @@ model UserGuess {
   guessId Int
 
   @@unique([userId, guessId, dayId])
-  @@index([userId])
+  @@index([dayId, userId])
+  @@map("user_guess")
 }

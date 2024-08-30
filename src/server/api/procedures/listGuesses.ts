@@ -1,6 +1,7 @@
 import type { GuessAnswer } from "@/lib/models";
 import { compareEntities } from "@/server/lib/comparator";
-import { getTodayArtist } from "@/server/lib/dailyPicker";
+import { type DayWithProps, getTodayArtist } from "@/server/lib/dailyPicker";
+import { TRPCError } from "@trpc/server";
 import { DateTime } from "luxon";
 import { z } from "zod";
 import { privateProcedure } from "../trpc";
@@ -21,7 +22,15 @@ export default privateProcedure
   .query(async ({ ctx: { db, user }, input }): Promise<GuessAnswer[]> => {
     console.log("Im here", user.userId);
     const date = fromIsoOrNow(input);
-    const today = await getTodayArtist();
+    let today: DayWithProps;
+    try {
+      today = await getTodayArtist();
+    } catch (err) {
+      if (err instanceof TRPCError && err.code === "NOT_FOUND") {
+        return [];
+      }
+      throw err;
+    }
     const guesses = await db.userGuess.findMany({
       where: {
         day: { day: date.startOf("day").toJSDate() },
