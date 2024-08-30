@@ -3,15 +3,13 @@
 import { queryTrpc } from "@/lib/trpc";
 // import { useAuth } from "@clerk/nextjs";
 import { Typography } from "@mui/material";
+import { type FC, Suspense } from "react";
 import GuessedArtistCard from "./GuessedArtistCard";
-import { Suspense, type FC } from "react";
 
 const GuessList: FC = () => {
-  const [data, { isFetching }] =
-    queryTrpc.artists.listGuesses.useSuspenseQuery();
+  const [data] = queryTrpc.artists.listGuesses.useSuspenseQuery();
   return (
     <>
-      {"fetching: " + isFetching}
       {data.map((guess) => (
         <GuessedArtistCard guess={guess} key={guess.artist.id} />
       ))}

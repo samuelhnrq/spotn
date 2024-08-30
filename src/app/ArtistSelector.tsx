@@ -11,15 +11,16 @@ import {
   Typography,
   debounce,
 } from "@mui/material";
-import React, {
+import { atom, useAtom } from "jotai";
+import type React from "react";
+import {
+  type PropsWithChildren,
+  type ReactNode,
   Suspense,
   useCallback,
   useEffect,
   useState,
-  type PropsWithChildren,
-  type ReactNode,
 } from "react";
-import { atom, useAtom } from "jotai";
 
 const loadingAtom = atom(false);
 
@@ -53,7 +54,7 @@ function useSearch() {
   const [, setLoading] = useAtom(loadingAtom);
   useEffect(() => {
     setLoading(result.isLoading);
-  }, [result.isLoading]);
+  }, [result.isLoading, setLoading]);
   const debounced = useCallback(
     debounce((val: string) => {
       setSearched(val);

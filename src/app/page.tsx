@@ -1,10 +1,10 @@
+import { rscTrpc } from "@/lib/trpc-server-client";
+import { SignedIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { Stack, Typography } from "@mui/material";
 import ArtistSelector from "./ArtistSelector";
 import Guesses from "./GuessesList";
 import NavBar from "./NavBar";
-import { rscTrpc } from "@/lib/trpc-server-client";
-import { auth } from "@clerk/nextjs/server";
-import { SignedIn } from "@clerk/nextjs";
 
 export default async function Home() {
   const authState = auth();

@@ -11,7 +11,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
-import { auth, type User } from "@clerk/nextjs/server";
+import { type User, auth } from "@clerk/nextjs/server";
 import { cache } from "react";
 
 export interface ContextOpts {
