@@ -5,15 +5,28 @@ import { DateTime } from "luxon";
 import { z } from "zod";
 import { privateProcedure } from "../trpc";
 
+function fromIsoOrNow(input?: string): DateTime {
+  if (input) {
+    try {
+      return DateTime.fromISO(input, { zone: "UTC" });
+    } catch (err) {
+      console.error("failed to parse date", input, err);
+    }
+  }
+  return DateTime.now().toUTC();
+}
+
 export default privateProcedure
   .input(z.string().datetime().optional())
   .query(async ({ ctx: { db, user }, input }): Promise<GuessAnswer[]> => {
-    const date = input
-      ? DateTime.fromISO(input, { zone: "UTC" })
-      : DateTime.now().toUTC();
+    console.log("Im here", user.userId);
+    const date = fromIsoOrNow(input);
     const today = await getTodayArtist();
     const guesses = await db.userGuess.findMany({
-      where: { day: { day: date.startOf("day").toJSDate() }, userId: user.id },
+      where: {
+        day: { day: date.startOf("day").toJSDate() },
+        userId: user.userId,
+      },
       include: {
         guess: {
           include: {

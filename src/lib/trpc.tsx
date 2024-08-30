@@ -1,24 +1,21 @@
 "use client";
 
 import type { AppRouter } from "@/server/api/root";
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  QueryClient,
-  QueryClientProvider,
-  defaultShouldDehydrateQuery,
-} from "@tanstack/react-query";
-import {
+  type CreateTRPCClientOptions,
   type TRPCUntypedClient,
   createTRPCClient,
   httpBatchLink,
   loggerLink,
-  unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
-import { useRef } from "react";
+import { useState } from "react";
 import SuperJSON from "superjson";
+import { makeQueryClient } from "./query-client";
 
-export const trpc = createTRPCReact<AppRouter>();
+export const queryTrpc = createTRPCReact<AppRouter>();
 
 let clientQueryClientSingleton: QueryClient;
 
@@ -39,43 +36,22 @@ function getQueryClient() {
  */
 export type RouterInputs = inferRouterInputs<AppRouter>;
 
-export const trpcClient = createTRPCClient<AppRouter>({
+// Config is isolated because I like having the vanilla client besides the untyped one of the context
+const trpcClientConfig: CreateTRPCClientOptions<AppRouter> = {
   links: [
     loggerLink({
       enabled: (op) =>
         process.env.NODE_ENV === "development" ||
         (op.direction === "down" && op.result instanceof Error),
     }),
-    unstable_httpBatchStreamLink({
-      transformer: SuperJSON,
+    httpBatchLink({
+      transformer: SuperJSON, // <-- if you use a data transformer
       url: `${getBaseUrl()}/api/trpc`,
-      headers: () => {
-        const headers = new Headers();
-        headers.set("x-trpc-source", "nextjs-react");
-        return headers;
-      },
     }),
   ],
-});
+};
 
-export function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 30 * 1000,
-      },
-      dehydrate: {
-        // serializeData: superjson.serialize,
-        shouldDehydrateQuery: (query) =>
-          defaultShouldDehydrateQuery(query) ||
-          query.state.status === "pending",
-      },
-      hydrate: {
-        // deserializeData: superjson.deserialize,
-      },
-    },
-  });
-}
+export const trpcClient = createTRPCClient<AppRouter>(trpcClientConfig);
 
 /**
  * Inference helper for outputs.
@@ -95,27 +71,15 @@ export function TRPCProvider(
     children: React.ReactNode;
   }>,
 ) {
-  // NOTE: Avoid useState when initializing the query client if you don't
-  //       have a suspense boundary between this and the code that may
-  //       suspend because React will throw away the client on the initial
-  //       render if it suspends and there is no boundary
   const queryClient = getQueryClient();
-  const trpcClientRef = useRef<TRPCUntypedClient<AppRouter> | null>();
-  if (!trpcClientRef.current) {
-    trpcClientRef.current = trpc.createClient({
-      links: [
-        httpBatchLink({
-          transformer: SuperJSON, // <-- if you use a data transformer
-          url: getBaseUrl(),
-        }),
-      ],
-    });
-  }
+  const [trpcClientRef] = useState<TRPCUntypedClient<AppRouter>>(() =>
+    queryTrpc.createClient(trpcClientConfig),
+  );
   return (
-    <trpc.Provider client={trpcClientRef.current} queryClient={queryClient}>
+    <queryTrpc.Provider client={trpcClientRef} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {props.children}
       </QueryClientProvider>
-    </trpc.Provider>
+    </queryTrpc.Provider>
   );
 }

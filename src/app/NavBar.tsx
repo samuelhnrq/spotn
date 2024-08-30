@@ -1,28 +1,21 @@
-import {
-  ClerkLoading,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import { AppBar, Button, Skeleton, Toolbar } from "@mui/material";
+import { SignInButton, UserButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { AppBar, Button, Toolbar } from "@mui/material";
 import type { FC } from "react";
 
 const NavBar: FC = () => {
+  const session = auth();
+
   return (
     <AppBar position="sticky">
       <Toolbar sx={{ justifyContent: "flex-end" }}>
-        <SignedOut>
+        {session.userId ? (
+          <UserButton />
+        ) : (
           <SignInButton>
             <Button>Log in</Button>
           </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-        <ClerkLoading>
-          <Skeleton variant="circular" width={35} height={35} />
-        </ClerkLoading>
+        )}
       </Toolbar>
     </AppBar>
   );

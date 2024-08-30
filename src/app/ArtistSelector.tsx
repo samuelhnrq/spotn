@@ -1,7 +1,7 @@
 "use client";
 
 import type { ArtistSearchResult } from "@/lib/models";
-import { trpc, trpcClient } from "@/lib/trpc";
+import { queryTrpc } from "@/lib/trpc";
 import {
   Autocomplete,
   Box,
@@ -9,48 +9,22 @@ import {
   type AutocompleteRenderInputParams as InputParams,
   TextField,
   Typography,
+  debounce,
 } from "@mui/material";
-import { bind } from "@react-rxjs/core";
-import { createSignal } from "@react-rxjs/utils";
-import React, { type ReactNode } from "react";
-import {
-  EMPTY,
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  filter,
-  from,
-  map,
-  merge,
-  mergeMap,
-  tap,
-} from "rxjs";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+  type ReactNode,
+} from "react";
+import { atom, useAtom } from "jotai";
 
-const [textChange$, setText] = createSignal<string>();
-const [useArtistList, artistList$] = bind<ArtistSearchResult[]>(
-  textChange$.pipe(
-    filter((txt) => txt?.length > 3),
-    debounceTime(300),
-    mergeMap((x) =>
-      from(trpcClient.artists.searchArtist.query(x)).pipe(
-        tap({ error: console.error }),
-        catchError(() => EMPTY),
-      ),
-    ),
-  ),
-  [],
-);
-
-const [useLoading] = bind(
-  merge(
-    textChange$.pipe(map((txt) => txt.length > 3)),
-    artistList$.pipe(map(() => false)),
-  ).pipe(distinctUntilChanged()),
-  false,
-);
+const loadingAtom = atom(false);
 
 function ArtistSelectorInput(params: InputParams): ReactNode {
-  const loading = useLoading();
+  const [isLoading] = useAtom(loadingAtom);
   return (
     <TextField
       {...params}
@@ -59,7 +33,7 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
           ...params.InputProps,
           endAdornment: (
             <>
-              {loading && <CircularProgress size={20} />}
+              {isLoading && <CircularProgress size={20} />}
               {params.InputProps.endAdornment}
             </>
           ),
@@ -70,11 +44,53 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
   );
 }
 
+function useSearch() {
+  const [searched, setSearched] = useState<string>("");
+  const result = queryTrpc.artists.searchArtist.useQuery(searched, {
+    enabled: !!searched,
+    refetchOnWindowFocus: false,
+  });
+  const [, setLoading] = useAtom(loadingAtom);
+  useEffect(() => {
+    setLoading(result.isLoading);
+  }, [result.isLoading]);
+  const debounced = useCallback(
+    debounce((val: string) => {
+      setSearched(val);
+    }, 500),
+    [],
+  );
+  const changeValue = useCallback(
+    (val: string) => {
+      setLoading(!!val);
+      debounced(val);
+    },
+    [debounced, setLoading],
+  );
+  return [changeValue, result] as const;
+}
+
+const RightTypography: React.FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <Typography width="100%" align="right">
+      {children}
+    </Typography>
+  );
+};
+
+const GuessesRemaining: React.FC = () => {
+  const [guessList] = queryTrpc.artists.listGuesses.useSuspenseQuery();
+  return <RightTypography>Guesses: {guessList.length}/10</RightTypography>;
+};
+
 function ArtistAutoComplete() {
-  const options = useArtistList();
-  const isLoading = useLoading();
-  const { mutate: guessArtist } = trpc.artists.guessArtist.useMutation();
-  const { data: guessList = [] } = trpc.artists.listGuesses.useQuery();
+  const utils = queryTrpc.useUtils();
+  const { mutate: guessArtist } = queryTrpc.artists.guessArtist.useMutation({
+    onSettled: () => {
+      utils.artists.listGuesses.invalidate();
+    },
+  });
+  const [setSearch, { data: options = [], isLoading }] = useSearch();
 
   return (
     <>
@@ -89,7 +105,7 @@ function ArtistAutoComplete() {
         noOptionsText="Artist not found"
         loadingText="Loading artists..."
         onInputChange={(_ev, val, reason) =>
-          reason !== "selectOption" && setText(val)
+          reason !== "selectOption" && setSearch(val)
         }
         isOptionEqualToValue={(opt, val) => opt.id === val.id}
         onChange={(_ev, val) => val && guessArtist(val.id)}
@@ -104,9 +120,9 @@ function ArtistAutoComplete() {
         fullWidth
         handleHomeEndKeys
       />
-      <Typography width="100%" align="right">
-        Guesses: {guessList.length}/10
-      </Typography>
+      <Suspense fallback={<RightTypography>Loading...</RightTypography>}>
+        <GuessesRemaining />
+      </Suspense>
     </>
   );
 }

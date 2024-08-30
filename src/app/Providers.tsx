@@ -1,6 +1,7 @@
 "use client";
 
 import { TRPCProvider } from "@/lib/trpc";
+import { Provider as JotaiProvider } from "jotai";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import type { PropsWithChildren } from "react";
@@ -15,7 +16,9 @@ if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
 function Providers({ children }: PropsWithChildren) {
   return (
     <PostHogProvider client={posthog}>
-      <TRPCProvider>{children}</TRPCProvider>
+      <JotaiProvider>
+        <TRPCProvider>{children}</TRPCProvider>
+      </JotaiProvider>
     </PostHogProvider>
   );
 }

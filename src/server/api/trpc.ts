@@ -11,7 +11,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "@/server/db";
-import type { User } from "@clerk/nextjs/server";
+import { auth, type User } from "@clerk/nextjs/server";
 import { cache } from "react";
 
 export interface ContextOpts {
@@ -31,7 +31,7 @@ export interface ContextOpts {
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = cache((opts: ContextOpts) => {
+export const createTRPCContext = cache((opts?: ContextOpts) => {
   return {
     db,
     ...opts,
@@ -91,7 +91,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
   if (t._config.isDev) {
     // artificial delay in dev
-    const waitMs = Math.floor(Math.random() * 400) + 100;
+    const waitMs = Math.floor(Math.random() * 600) + 100;
     await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
 
@@ -103,11 +103,13 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   return result;
 });
 
-const authMiddleware = t.middleware(async ({ next, ctx }) => {
-  if (!ctx.user) {
+const authMiddleware = t.middleware(async ({ next }) => {
+  const authState = auth();
+  if (!authState.userId) {
+    console.log("cannot access protected");
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return next({ ctx: { user: ctx.user } });
+  return next({ ctx: { user: authState } });
 });
 
 /**

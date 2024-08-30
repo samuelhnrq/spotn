@@ -28,7 +28,7 @@ export default privateProcedure
       try {
         const guess = await db.userGuess.create({
           data: {
-            userId: user.id,
+            userId: user.userId,
             dayId: todayAnswer.id,
             guessId: artistId,
           },

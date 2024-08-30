@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 import Providers from "./Providers";
 import ServerProvider from "./ServerProvider";
+import { HydrateClient } from "@/lib/trpc-server-client";
 
 export const metadata: Metadata = {
   title: "Spotn",
@@ -14,7 +15,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
     <html lang="en" className={GeistSans.className}>
       <body>
         <ServerProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            <HydrateClient>{children}</HydrateClient>
+          </Providers>
         </ServerProvider>
       </body>
     </html>

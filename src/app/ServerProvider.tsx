@@ -9,7 +9,7 @@ import type { PropsWithChildren } from "react";
 function ServerProvider({ children }: PropsWithChildren) {
   return (
     <ClerkProvider appearance={{ baseTheme: dark }}>
-      <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+      <AppRouterCacheProvider>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           {children}
