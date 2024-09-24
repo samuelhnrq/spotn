@@ -1,8 +1,8 @@
 "use client";
 
-import { AppBar, Avatar, Toolbar, IconButton, Button } from "@mui/material";
-import { signIn, signOut } from "next-auth/react";
+import { AppBar, Avatar, Button, IconButton, Toolbar } from "@mui/material";
 import type { Session } from "next-auth";
+import { signIn, signOut } from "next-auth/react";
 
 import type { FC } from "react";
 

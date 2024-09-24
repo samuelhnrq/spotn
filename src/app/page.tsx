@@ -1,6 +1,6 @@
-import { api } from "@/trpc/server";
 import { auth } from "@/server/auth";
-import { Stack, Typography, CircularProgress } from "@mui/material";
+import { api } from "@/trpc/server";
+import { CircularProgress, Stack, Typography } from "@mui/material";
 import { Suspense } from "react";
 import ArtistSelector from "./ArtistSelector";
 import Guesses from "./GuessesList";

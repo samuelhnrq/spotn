@@ -1,8 +1,8 @@
 "use client";
 
+import { useGuesses } from "@/lib/hooks";
 import { Typography } from "@mui/material";
 import GuessedArtistCard from "./GuessedArtistCard";
-import { useGuesses } from "@/lib/hooks";
 
 function Guesses() {
   const [data = []] = useGuesses();

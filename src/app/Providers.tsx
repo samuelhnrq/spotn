@@ -2,9 +2,9 @@
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { Provider as JotaiProvider } from "jotai";
+import { SessionProvider } from "next-auth/react";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
-import { SessionProvider } from "next-auth/react";
 import type { PropsWithChildren } from "react";
 
 if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
