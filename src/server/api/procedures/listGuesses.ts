@@ -1,10 +1,12 @@
+import "server-only";
+
 import type { GuessAnswer } from "@/lib/models";
 import { compareEntities } from "@/server/lib/comparator";
 import { type DayWithProps, getTodayArtist } from "@/server/lib/dailyPicker";
 import { TRPCError } from "@trpc/server";
 import { DateTime } from "luxon";
 import { z } from "zod";
-import { privateProcedure } from "../trpc";
+import { protectedProcedure } from "../trpc";
 
 function fromIsoOrNow(input?: string): DateTime {
   if (input) {
@@ -17,10 +19,9 @@ function fromIsoOrNow(input?: string): DateTime {
   return DateTime.now().toUTC();
 }
 
-export default privateProcedure
+export default protectedProcedure
   .input(z.string().datetime().optional())
-  .query(async ({ ctx: { db, user }, input }): Promise<GuessAnswer[]> => {
-    console.log("Im here", user.userId);
+  .query(async ({ ctx: { db, session }, input }): Promise<GuessAnswer[]> => {
     const date = fromIsoOrNow(input);
     let today: DayWithProps;
     try {
@@ -34,7 +35,7 @@ export default privateProcedure
     const guesses = await db.userGuess.findMany({
       where: {
         day: { day: date.startOf("day").toJSDate() },
-        userId: user.userId,
+        userId: session.user?.email || undefined,
       },
       include: {
         guess: {

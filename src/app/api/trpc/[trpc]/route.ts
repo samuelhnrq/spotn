@@ -2,8 +2,8 @@ import "server-only";
 
 import { appRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";
-import { currentUser } from "@clerk/nextjs/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+
 import type { NextRequest } from "next/server";
 
 /**
@@ -11,9 +11,7 @@ import type { NextRequest } from "next/server";
  * handling a HTTP request (e.g. when you make requests from Client Components).
  */
 const createContext = async (req: NextRequest) => {
-  const user = await currentUser();
   return createTRPCContext({
-    user: user || undefined,
     headers: req.headers,
   });
 };
@@ -21,17 +19,9 @@ const createContext = async (req: NextRequest) => {
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
     endpoint: "/api/trpc",
-    req,
+    req: req,
     router: appRouter,
     createContext: () => createContext(req),
-    onError:
-      process.env.NODE_ENV === "development"
-        ? ({ path, error }) => {
-            console.error(
-              `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
-            );
-          }
-        : undefined,
   });
 
 export { handler as GET, handler as POST };

@@ -1,17 +1,16 @@
-import { rscTrpc } from "@/lib/trpc-server-client";
-import { SignedIn } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import { Stack, Typography } from "@mui/material";
+import { api } from "@/trpc/server";
+import { auth } from "@/server/auth";
+import { Stack, Typography, CircularProgress } from "@mui/material";
+import { Suspense } from "react";
 import ArtistSelector from "./ArtistSelector";
 import Guesses from "./GuessesList";
 import NavBar from "./NavBar";
 
 export default async function Home() {
-  const authState = auth();
-  if (authState.userId) {
-    await rscTrpc.artists.listGuesses.prefetch();
+  const session = await auth();
+  if (session) {
+    await api.artists.listGuesses.prefetch();
   }
-
   return (
     <Stack
       sx={{
@@ -19,7 +18,7 @@ export default async function Home() {
         width: "100%",
       }}
     >
-      <NavBar />
+      <NavBar preloaded={session} />
       <Stack
         sx={{
           flex: 1,
@@ -33,10 +32,14 @@ export default async function Home() {
         <Typography variant="h1" align="center" sx={{ marginBottom: "1rem" }}>
           Spotn
         </Typography>
-        <SignedIn>
-          <ArtistSelector />
-          <Guesses />
-        </SignedIn>
+        {session && (
+          <>
+            <ArtistSelector />
+            <Suspense fallback={<CircularProgress />}>
+              <Guesses />
+            </Suspense>
+          </>
+        )}
       </Stack>
     </Stack>
   );

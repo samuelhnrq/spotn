@@ -1,20 +1,24 @@
-import { SignInButton, UserButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import { AppBar, Button, Toolbar } from "@mui/material";
+"use client";
+
+import { AppBar, Avatar, Toolbar, IconButton, Button } from "@mui/material";
+import { signIn, signOut } from "next-auth/react";
+import type { Session } from "next-auth";
+
 import type { FC } from "react";
 
-const NavBar: FC = () => {
-  const session = auth();
-
+const NavBar: FC<{ preloaded: Session | null }> = ({ preloaded }) => {
   return (
     <AppBar position="sticky">
       <Toolbar sx={{ justifyContent: "flex-end" }}>
-        {session.userId ? (
-          <UserButton />
-        ) : (
-          <SignInButton>
-            <Button>Log in</Button>
-          </SignInButton>
+        {preloaded && (
+          <IconButton onClick={() => signOut()}>
+            <Avatar />
+          </IconButton>
+        )}
+        {!preloaded && (
+          <Button onClick={() => signIn()} variant="outlined">
+            Log in
+          </Button>
         )}
       </Toolbar>
     </AppBar>

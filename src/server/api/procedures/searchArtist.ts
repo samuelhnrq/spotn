@@ -1,9 +1,11 @@
+import "server-only";
+
 import type { ArtistSearchResult } from "@/lib/models";
 import { db } from "@/server/db";
 import { z } from "zod";
-import { privateProcedure } from "../trpc";
+import { protectedProcedure } from "../trpc";
 
-export default privateProcedure
+export default protectedProcedure
   .input(z.string().min(3))
   .query(async ({ input }): Promise<ArtistSearchResult[]> => {
     const artists = await db.entity.findMany({

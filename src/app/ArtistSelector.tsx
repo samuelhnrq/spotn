@@ -1,7 +1,8 @@
 "use client";
 
+import { useGuesses } from "@/lib/hooks";
 import type { ArtistSearchResult } from "@/lib/models";
-import { queryTrpc } from "@/lib/trpc";
+import { api as queryTrpc } from "@/trpc/react";
 import {
   Autocomplete,
   Box,
@@ -16,7 +17,6 @@ import type React from "react";
 import {
   type PropsWithChildren,
   type ReactNode,
-  Suspense,
   useCallback,
   useEffect,
   useState,
@@ -80,8 +80,8 @@ const RightTypography: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 const GuessesRemaining: React.FC = () => {
-  const [guessList] = queryTrpc.artists.listGuesses.useSuspenseQuery();
-  return <RightTypography>Guesses: {guessList.length}/10</RightTypography>;
+  const [data] = useGuesses();
+  return <RightTypography>Guesses: {data.length}/10</RightTypography>;
 };
 
 function ArtistAutoComplete() {
@@ -121,9 +121,7 @@ function ArtistAutoComplete() {
         fullWidth
         handleHomeEndKeys
       />
-      <Suspense fallback={<RightTypography>Loading...</RightTypography>}>
-        <GuessesRemaining />
-      </Suspense>
+      <GuessesRemaining />
     </>
   );
 }

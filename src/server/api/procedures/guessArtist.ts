@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { GuessAnswer } from "@/lib/models";
 import { db } from "@/server/db";
 import { compareEntities } from "@/server/lib/comparator";
@@ -8,7 +10,7 @@ import {
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { privateProcedure } from "../trpc";
+import { protectedProcedure } from "../trpc";
 
 function isUniqueError(err: unknown): boolean {
   return (
@@ -16,10 +18,10 @@ function isUniqueError(err: unknown): boolean {
   );
 }
 
-export default privateProcedure
+export default protectedProcedure
   .input(z.number().positive())
   .mutation(
-    async ({ input: artistId, ctx: { user } }): Promise<GuessAnswer> => {
+    async ({ input: artistId, ctx: { session } }): Promise<GuessAnswer> => {
       const guessedArtist = await db.entity.findUniqueOrThrow({
         where: { id: artistId },
         include: { props: { include: { prop: true } } },
@@ -28,7 +30,7 @@ export default privateProcedure
       try {
         const guess = await db.userGuess.create({
           data: {
-            userId: user.userId,
+            userId: session.user?.email || "",
             dayId: todayAnswer.id,
             guessId: artistId,
           },

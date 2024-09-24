@@ -1,4 +1,4 @@
-import { HydrateClient } from "@/lib/trpc-server-client";
+import { HydrateClient } from "@/trpc/server";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
