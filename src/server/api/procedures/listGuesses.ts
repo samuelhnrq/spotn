@@ -19,7 +19,7 @@ function fromIsoOrNow(input?: string): DateTime {
   return DateTime.now().toUTC();
 }
 
-export default protectedProcedure
+export const listGuesses = protectedProcedure
   .input(z.string().datetime().optional())
   .query(async ({ ctx: { db, session }, input }): Promise<GuessAnswer[]> => {
     const date = fromIsoOrNow(input);

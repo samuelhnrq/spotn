@@ -47,10 +47,7 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
 
 function useSearch() {
   const [searched, setSearched] = useState<string>("");
-  const result = queryTrpc.artists.searchArtist.useQuery(searched, {
-    enabled: !!searched,
-    refetchOnWindowFocus: false,
-  });
+  const result = queryTrpc.artists.searchArtist.useQuery(searched);
   const [, setLoading] = useAtom(loadingAtom);
   useEffect(() => {
     setLoading(result.isLoading);

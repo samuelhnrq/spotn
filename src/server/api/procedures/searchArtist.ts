@@ -6,7 +6,7 @@ import { z } from "zod";
 import { protectedProcedure } from "../trpc";
 
 export default protectedProcedure
-  .input(z.string().min(3))
+  .input(z.string())
   .query(async ({ input }): Promise<ArtistSearchResult[]> => {
     const artists = await db.entity.findMany({
       select: { id: true, name: true },

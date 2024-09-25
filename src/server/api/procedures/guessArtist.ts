@@ -18,7 +18,7 @@ function isUniqueError(err: unknown): boolean {
   );
 }
 
-export default protectedProcedure
+export const guessArtist = protectedProcedure
   .input(z.number().positive())
   .mutation(
     async ({ input: artistId, ctx: { session } }): Promise<GuessAnswer> => {

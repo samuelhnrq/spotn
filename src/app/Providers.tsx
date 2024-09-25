@@ -1,6 +1,5 @@
 "use client";
 
-import { TRPCReactProvider } from "@/trpc/react";
 import { Provider as JotaiProvider } from "jotai";
 import { SessionProvider } from "next-auth/react";
 import posthog from "posthog-js";
@@ -18,9 +17,7 @@ function Providers({ children }: PropsWithChildren) {
   return (
     <PostHogProvider client={posthog}>
       <SessionProvider>
-        <JotaiProvider>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-        </JotaiProvider>
+        <JotaiProvider>{children}</JotaiProvider>
       </SessionProvider>
     </PostHogProvider>
   );

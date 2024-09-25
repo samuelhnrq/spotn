@@ -1,13 +1,12 @@
 "use client";
 
+import type { AppRouter } from "@/server/api/root";
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 import { useState } from "react";
 import SuperJSON from "superjson";
-
-import type { AppRouter } from "@/server/api/root";
 import { createQueryClient } from "./query-client";
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
@@ -37,7 +36,10 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
-export function TRPCReactProvider(props: { children: React.ReactNode }) {
+export function TRPCReactProvider(props: {
+  children: React.ReactNode;
+  sessionToken?: string | null;
+}) {
   const queryClient = getQueryClient();
 
   const [trpcClient] = useState(() =>
@@ -52,9 +54,13 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           transformer: SuperJSON,
           url: `${getBaseUrl()}/api/trpc`,
           headers: () => {
-            const headers = new Headers();
-            headers.set("x-trpc-source", "nextjs-react");
-            return headers;
+            const h = new Headers();
+            h.set("x-trpc-source", "nextjs-react");
+            if (typeof window === "undefined" && props.sessionToken) {
+              console.log("setting session token on server");
+              h.set("cookie", `authjs.session-token=${props.sessionToken}`);
+            }
+            return h;
           },
         }),
       ],
