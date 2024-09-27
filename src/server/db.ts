@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 // import { env } from "@/env";
 // const { env } = process;
-const isProd = process.env.NODE_ENV !== "production";
+const isProd = process.env.NODE_ENV === "production";
 
 const createPrismaClient = () =>
   new PrismaClient({

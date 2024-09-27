@@ -48,6 +48,8 @@ export const listGuesses = protectedProcedure
           omit: { createdAt: true, updatedAt: true },
         },
       },
+      orderBy: { createdAt: "desc" },
+      take: 10,
     });
     return guesses.map((x) => compareEntities(today.entity, x));
   });

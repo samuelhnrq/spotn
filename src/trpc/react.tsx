@@ -38,7 +38,6 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export function TRPCReactProvider(props: {
   children: React.ReactNode;
-  sessionToken?: string | null;
 }) {
   const queryClient = getQueryClient();
 
@@ -56,9 +55,8 @@ export function TRPCReactProvider(props: {
           headers: () => {
             const h = new Headers();
             h.set("x-trpc-source", "nextjs-react");
-            if (typeof window === "undefined" && props.sessionToken) {
-              console.log("setting session token on server");
-              h.set("cookie", `authjs.session-token=${props.sessionToken}`);
+            if (typeof window === "undefined") {
+              throw new Error("Setting session token on server");
             }
             return h;
           },

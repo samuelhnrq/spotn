@@ -3,6 +3,7 @@ import "server-only";
 import { appRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { auth } from "@/server/auth";
 
 import type { NextRequest } from "next/server";
 
@@ -11,8 +12,11 @@ import type { NextRequest } from "next/server";
  * handling a HTTP request (e.g. when you make requests from Client Components).
  */
 const createContext = async (req: NextRequest) => {
+  console.log("creating context to", req.headers.get("user-agent"));
+  const session = await auth();
   return createTRPCContext({
     headers: req.headers,
+    session,
   });
 };
 

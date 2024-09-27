@@ -12,7 +12,6 @@ import {
   Typography,
   debounce,
 } from "@mui/material";
-import { atom, useAtom } from "jotai";
 import type React from "react";
 import {
   type PropsWithChildren,
@@ -21,11 +20,14 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useLoading } from "./state";
+import { useAtom, atom } from "jotai";
 
-const loadingAtom = atom(false);
+const searchPendingAtom = atom(false);
 
 function ArtistSelectorInput(params: InputParams): ReactNode {
-  const [isLoading] = useAtom(loadingAtom);
+  const [isLoading] = useAtom(searchPendingAtom);
+  const [touched, setTouched] = useState(false);
   return (
     <TextField
       {...params}
@@ -34,12 +36,13 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
           ...params.InputProps,
           endAdornment: (
             <>
-              {isLoading && <CircularProgress size={20} />}
+              {touched && isLoading && <CircularProgress size={20} />}
               {params.InputProps.endAdornment}
             </>
           ),
         },
       }}
+      onFocus={() => setTouched(true)}
       label="Artist"
     />
   );
@@ -48,24 +51,24 @@ function ArtistSelectorInput(params: InputParams): ReactNode {
 function useSearch() {
   const [searched, setSearched] = useState<string>("");
   const result = queryTrpc.artists.searchArtist.useQuery(searched);
-  const [, setLoading] = useAtom(loadingAtom);
+  const [, setPending] = useAtom(searchPendingAtom);
   useEffect(() => {
-    setLoading(result.isLoading);
-  }, [result.isLoading, setLoading]);
+    setPending(result.isLoading);
+  }, [result.isLoading, setPending]);
   const debounced = useCallback(
     debounce((val: string) => {
       setSearched(val);
-    }, 500),
+    }, 100),
     [],
   );
   const changeValue = useCallback(
     (val: string) => {
-      setLoading(!!val);
+      setPending(result.isLoading);
       debounced(val);
     },
-    [debounced, setLoading],
+    [result.isLoading, debounced, setPending],
   );
-  return [changeValue, result] as const;
+  return [searched, changeValue, result] as const;
 }
 
 const RightTypography: React.FC<PropsWithChildren> = ({ children }) => {
@@ -77,18 +80,24 @@ const RightTypography: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 const GuessesRemaining: React.FC = () => {
-  const [data] = useGuesses();
+  const { data = [] } = useGuesses();
   return <RightTypography>Guesses: {data.length}/10</RightTypography>;
 };
 
 function ArtistAutoComplete() {
   const utils = queryTrpc.useUtils();
+  const [value, setSearch, { data: options = [] }] = useSearch();
+  const [, setLoading] = useLoading();
+  const [pending] = useAtom(searchPendingAtom);
   const { mutate: guessArtist } = queryTrpc.artists.guessArtist.useMutation({
-    onSettled: () => {
-      utils.artists.listGuesses.invalidate();
+    onMutate() {
+      setLoading(true);
+    },
+    onSettled: async () => {
+      setSearch("");
+      await utils.artists.listGuesses.invalidate();
     },
   });
-  const [setSearch, { data: options = [], isLoading }] = useSearch();
 
   return (
     <>
@@ -105,9 +114,15 @@ function ArtistAutoComplete() {
         onInputChange={(_ev, val, reason) =>
           reason !== "selectOption" && setSearch(val)
         }
+        inputValue={value}
         isOptionEqualToValue={(opt, val) => opt.id === val.id}
-        onChange={(_ev, val) => val && guessArtist(val.id)}
-        loading={isLoading}
+        onChange={(_ev, val) => {
+          if (val) {
+            guessArtist(val.id);
+            setSearch("");
+          }
+        }}
+        loading={pending}
         renderOption={(props, option) => (
           <Box component="li" {...props} key={option.id}>
             {option.name}

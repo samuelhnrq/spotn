@@ -80,12 +80,13 @@ model DailyEntity {
 }
 
 model UserGuess {
-  id      Int         @id @default(autoincrement())
-  userId  String
-  day     DailyEntity @relation(fields: [dayId], references: [id])
-  guess   Entity      @relation(fields: [guessId], references: [id])
-  dayId   Int
-  guessId Int
+  id        Int         @id @default(autoincrement())
+  userId    String
+  day       DailyEntity @relation(fields: [dayId], references: [id])
+  guess     Entity      @relation(fields: [guessId], references: [id])
+  dayId     Int
+  guessId   Int
+  createdAt DateTime    @default(now()) @map("created_at")
 
   @@unique([userId, guessId, dayId])
   @@index([dayId, userId])

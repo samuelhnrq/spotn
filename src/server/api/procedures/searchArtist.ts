@@ -7,9 +7,26 @@ import { protectedProcedure } from "../trpc";
 
 export default protectedProcedure
   .input(z.string())
-  .query(async ({ input }): Promise<ArtistSearchResult[]> => {
+  .query(async ({ input, ctx: { session } }): Promise<ArtistSearchResult[]> => {
+    if (input.length < 3) {
+      return db.entity.findMany({
+        select: { id: true, name: true },
+        take: 20,
+        orderBy: { name: "asc" },
+      });
+    }
     const artists = await db.entity.findMany({
-      select: { id: true, name: true },
+      select: {
+        id: true,
+        name: true,
+        UserGuess: {
+          where: {
+            userId: { not: session?.user?.email || undefined },
+          },
+        },
+      },
+      take: 20,
+      orderBy: { name: "asc" },
       where: {
         name: {
           mode: "insensitive",
@@ -17,10 +34,5 @@ export default protectedProcedure
         },
       },
     });
-    return artists.map(
-      (x): ArtistSearchResult => ({
-        id: x.id,
-        name: x.name,
-      }),
-    );
+    return artists;
   });
